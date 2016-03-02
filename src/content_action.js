@@ -76,8 +76,10 @@
       var tip = commentPanel.find("span[class*='CommentBox_dividerText'] i");
       var tipHtml = tip.attr("data-tip");
       var tipNode = $("<div>" + tipHtml + "</div>");
-      console.log(chrome.runtime.getManifest());
-      $("<li>『<a href='http://zhuanlan.zhihu.com/swgr6/20612507' target='_blank'>知乎精选评论还原器</a>』版本："  + chrome.runtime.getManifest().version + " | <a href='https://github.com/swgr424/ZhihuSelectedCommentReverter' target='_blank'>检查更新</a></li>").appendTo(tipNode.find("ul"));
+      $("<li>『<a href='http://zhuanlan.zhihu.com/swgr6/20612507' target='_blank'>知乎精选评论还原器</a>』" +
+        "版本："  + chrome.runtime.getManifest().version + " | " +
+        "<a href='https://github.com/swgr424/ZhihuSelectedCommentReverter' target='_blank'>检查更新</a>" +
+        "</li>").appendTo(tipNode.find("ul"));
       tip.attr("data-tip", tipNode.html());
       
       start();
@@ -101,5 +103,3 @@
   stop = function() { observer.disconnect(); }
   start();
 })();
-
-console.log("init done.");
