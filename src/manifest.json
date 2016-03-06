@@ -3,14 +3,19 @@
 
   "name": "知乎精选评论还原器",
   "description": "提供撤销知乎“精选评论”功能的可能，解决因此导致的乱序问题",
-  "version": "1.0",
+  "version": "1.1",
 
   "content_scripts": [{
     "matches": [
       "http://*.zhihu.com/*",
       "https://*.zhihu.com/*"
     ],
-    "js": ["js/jquery-2.1.4.min.js", "content_action.js"]
+    "js": [
+      "js/jquery-2.1.4.min.js",
+      "js/spin.min.js",
+      "js/jquery.spin.js",
+      "content_action.js"
+    ]
   }],
 
   "permissions": [

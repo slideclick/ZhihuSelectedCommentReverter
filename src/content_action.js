@@ -4,10 +4,42 @@
   var getTimeFromComment = function(commentElem) {
     return $(commentElem).find("time").attr("title");
   }  // getTimeFromComment
-  
-  var listener = function(mutations, observer, start, stop) {
+
+  var info;
+  (function() {
+    info = $("<li></li>");
+    var currentVersion = chrome.runtime.getManifest().version;
+    var updater = $("<span><a href='#'>检查更新</a></span>");
+    updater.children('a').click(function() {
+      var githubRaw = "https://raw.githubusercontent.com/swgr424/ZhihuSelectedCommentReverter";
+      var manifestUrl = githubRaw + "/master/src/manifest.json";
+      var crxUrl = githubRaw + "/master/ZhihuSelectedCommentReverter.crx";
+      var spinner = $("<div style='position:relative; display:inline-block; width:20pt'>&nbsp;</div>");
+      updater.empty().append(spinner);
+      spinner.spin({scale: 0.4, top: '50%', left: '50%'});
+      $.getJSON(manifestUrl, function(data) {
+        spinner.spin(false);
+        if (data.version > currentVersion) {
+          updater.empty().append($("<a href='" + crxUrl + "'>下载新版(v" + data.version + ")  </a>"));
+        } else {
+          updater.empty().append($("<html>当前已最新</html>"));
+        }
+      });
+      return false;
+    });
+    info.append($("<a href='http://zhuanlan.zhihu.com/swgr6/20612507' target='_blank'>知乎精选评论还原器</a>"));
+    info.append($("<html> v"  + currentVersion + " | </html>"));
+    info.append(updater);
+  })();  // info initializer
+
+  var listener = function(mutations, observer) {
     for (var i = 0; i < mutations.length; ++i) {
       var mutation = $(mutations[i].target);
+      var infoPlaceholder = $("li#restorerInfo");
+      if (infoPlaceholder.length > 0) {
+        infoPlaceholder.replaceWith(info);
+        continue;
+      }
       // Find the comment panel contains current mutation.
       var commentPanel = $("div.zm-item-comment-el").filter(function(idx, elem) {
         return $(elem).find(mutation).length == 1;
@@ -16,7 +48,7 @@
       if (!divider[0]) continue;
       if (divider[0].injected) break;
       divider[0].injected = true;
-      
+
       // Separate selected/normal comments into two arrays.
       var selectedCommentElems = [];
       var normalCommentElems = [];
@@ -34,7 +66,7 @@
           }
         });
       })();
-      
+
       var mergeArray = function(arr1, arr2, getFeature) {
         if (arr1.length == 0) return arr2;
         if (arr2.length == 0) return arr1;
@@ -44,11 +76,10 @@
           return [arr2[0]].concat(mergeArray(arr1, arr2.slice(1), getFeature));
         }
       }  // mergeArray
-      
+
       // The injected button and its event logic.
       var restorer = $("<a href='#' class='meta-item'>restorer</a>");
       var refresh = function() {
-        stop();
         if (!commentPanel[0].selectedState) {
           selectedCommentElems.forEach(function(elem) {
             elem.originalBgcolor = $(elem).css("background-color");
@@ -62,27 +93,20 @@
           $(selectedCommentElems).insertBefore(divider);
         }
         restorer.text(commentPanel[0].selectedState ? "内嵌" : "收集");
-        start();
       }  // refresh
-      
+
       restorer.click(function() {
         commentPanel[0].selectedState = !commentPanel[0].selectedState;
         refresh();
         return false;
       });  // click
-      
-      stop();
-      restorer.appendTo(commentPanel.find("span[class*='CommentBox_dividerText']"));
+
+      commentPanel.find("span[class*='CommentBox_dividerText']").append(restorer);
       var tip = commentPanel.find("span[class*='CommentBox_dividerText'] i");
-      var tipHtml = tip.attr("data-tip");
-      var tipNode = $("<div>" + tipHtml + "</div>");
-      $("<li>『<a href='http://zhuanlan.zhihu.com/swgr6/20612507' target='_blank'>知乎精选评论还原器</a>』" +
-        "版本："  + chrome.runtime.getManifest().version + " | " +
-        "<a href='https://github.com/swgr424/ZhihuSelectedCommentReverter' target='_blank'>检查更新</a>" +
-        "</li>").appendTo(tipNode.find("ul"));
+      var tipNode = $("<div>" + tip.attr("data-tip") + "</div>");
+      tipNode.find("ul").append($("<li id='restorerInfo'>placeholder</li>"));
       tip.attr("data-tip", tipNode.html());
-      
-      start();
+
       if (!commentPanel[0].hasOwnProperty("selectedState")) {
         commentPanel[0].selectedState = true;
       }
@@ -92,14 +116,9 @@
     }
   }  // listener
 
-  var start, stop;
-  var observer = new MutationObserver(function(m, o) { listener(m, o, start, stop); });
-  start = function() {
-    observer.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-  }
-  stop = function() { observer.disconnect(); }
-  start();
+  var observer = new MutationObserver(listener);
+  observer.observe(document.body, {
+    childList: true,
+    subtree: true
+  });
 })();
