@@ -9,8 +9,9 @@
   (function() {
     info = $("<li></li>");
     var currentVersion = chrome.runtime.getManifest().version;
-    var updater = $("<span><a href='#'>检查更新</a></span>");
-    updater.children('a').click(function() {
+    var updater = $("<span></span>");
+    var updaterLink = $("<a href='#'>检查更新</a>");
+    var checkUpdate = function() {
       var githubRaw = "https://raw.githubusercontent.com/swgr424/ZhihuSelectedCommentReverter";
       var manifestUrl = githubRaw + "/master/src/manifest.json";
       var crxUrl = githubRaw + "/master/ZhihuSelectedCommentReverter.crx";
@@ -24,9 +25,18 @@
         } else {
           updater.empty().append($("<html>当前已最新</html>"));
         }
+      }).fail(function(){
+        spinner.spin(false);
+        updater.empty().append($("<html>检查更新出错..</html>"));
+        var retryLink = $("<a href='#'>重试</a>");
+        retryLink.click(checkUpdate);
+        updater.append(retryLink);
       });
       return false;
-    });
+    }
+    updaterLink.click(checkUpdate);
+    console.log(updaterLink.click);
+    updater.append(updaterLink);
     info.append($("<a href='http://zhuanlan.zhihu.com/swgr6/20612507' target='_blank'>知乎精选评论还原器</a>"));
     info.append($("<html> v"  + currentVersion + " | </html>"));
     info.append(updater);
