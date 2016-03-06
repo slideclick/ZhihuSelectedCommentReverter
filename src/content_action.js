@@ -35,7 +35,6 @@
       return false;
     }
     updaterLink.click(checkUpdate);
-    console.log(updaterLink.click);
     updater.append(updaterLink);
     info.append($("<a href='http://zhuanlan.zhihu.com/swgr6/20612507' target='_blank'>知乎精选评论还原器</a>"));
     info.append($("<html> v"  + currentVersion + " | </html>"));
