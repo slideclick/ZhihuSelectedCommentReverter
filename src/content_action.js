@@ -50,7 +50,7 @@
         continue;
       }
       // Find the comment panel contains current mutation.
-      var commentPanel = $("div.zm-item-comment-el").filter(function(idx, elem) {
+      var commentPanel = $("div.comment-app-holder").filter(function(idx, elem) {
         return $(elem).find(mutation).length == 1;
       });
       var divider = commentPanel.find("div[class*='CommentBox_divider']");
